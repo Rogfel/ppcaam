@@ -196,6 +196,7 @@ logs/
 *.db
 *.sqlite
 *.sqlite3
+*.xlsx
 
 # Configuration files with sensitive data
 config.ini
