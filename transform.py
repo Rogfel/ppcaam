@@ -119,32 +119,50 @@ def step_3(ano_referencia):
     secao_list = secao_map['secao']
     
     secao = ''
+    count_abrangencia = 2
+    count_violencia = 2
+    count_familia_solidaria = 2
     # Itera sobre as linhas do dataframe original e transforma os dados
     for index, row in dados.iterrows():
+        if row['Unnamed: 0'] == 'Abrangência do tráfico':
+            count_abrangencia -= 1
+        if row['Unnamed: 0'] == 'Vítima de violência sexual':
+            count_violencia -= 1
+        if row['Unnamed: 0'] == 'Família Solidária':
+            count_familia_solidaria -= 1
         # Extrai os dados necessários e adiciona ao novo dataframe
-        if row['Unnamed: 0'] in secao_list:
+        if row['Unnamed: 0'] in secao_list and row['Unnamed: 0'] != 'Abrangência do tráfico' and row['Unnamed: 0'] != 'Vítima de violência sexual':
             secao = row['Unnamed: 0']
-            continue
-        unidade = row['estado']
-        metrica = row['Unnamed: 0']
-        ano_anterior = row['Ministério dos Direitos Humanos e da Cidadania']
-        meses = { 'janeiro': row['Unnamed: 2'], 'fevereiro': row['Unnamed: 3'], 'marco': row['Unnamed: 4'],
-                   'abril': row['Unnamed: 5'], 'maio': row['Unnamed: 6'], 'junho': row['Unnamed: 7'],
-                   'julho': row['Unnamed: 8'], 'agosto': row['Unnamed: 9'], 'setembro': row['Unnamed: 10'],
-                   'outubro': row['Unnamed: 11'], 'novembro': row['Unnamed: 12'], 'dezembro': row['Unnamed: 13'] }
-        nova_linha = {
-            'ano_referencia': ano_referencia,
-            'unidade': unidade,
-            'secao': secao,
-            'metrica': metrica,
-            'ano_anterior': ano_anterior,
-            **meses,
-            'total': row['Unnamed: 14']
-        }
-        dados_transformados = pd.concat(
-            [dados_transformados, pd.DataFrame([nova_linha])], 
-            ignore_index=True
-        )
+        elif row['Unnamed: 0'] == 'Abrangência do tráfico' and count_abrangencia == 0:
+            secao = 'Abrangência do tráfico'
+            count_abrangencia = 2
+        elif row['Unnamed: 0'] == 'Vítima de violência sexual' and count_violencia == 0:
+            secao = 'Vítima de violência sexual'
+            count_violencia = 2
+        elif row['Unnamed: 0'] == 'Família Solidária' and count_familia_solidaria == 0:
+            secao = 'Família Solidária'
+            count_familia_solidaria = 2
+        else:
+            unidade = row['estado']
+            metrica = row['Unnamed: 0']
+            ano_anterior = row['Ministério dos Direitos Humanos e da Cidadania']
+            meses = { 'janeiro': row['Unnamed: 2'], 'fevereiro': row['Unnamed: 3'], 'marco': row['Unnamed: 4'],
+                    'abril': row['Unnamed: 5'], 'maio': row['Unnamed: 6'], 'junho': row['Unnamed: 7'],
+                    'julho': row['Unnamed: 8'], 'agosto': row['Unnamed: 9'], 'setembro': row['Unnamed: 10'],
+                    'outubro': row['Unnamed: 11'], 'novembro': row['Unnamed: 12'], 'dezembro': row['Unnamed: 13'] }
+            nova_linha = {
+                'ano_referencia': ano_referencia,
+                'unidade': unidade,
+                'secao': secao,
+                'metrica': metrica,
+                'ano_anterior': ano_anterior,
+                **meses,
+                'total': row['Unnamed: 14']
+            }
+            dados_transformados = pd.concat(
+                [dados_transformados, pd.DataFrame([nova_linha])], 
+                ignore_index=True
+            )
     # Salva o dataframe transformado
     dados_transformados.to_csv("dados_transformados_PPCAAM.csv", index=False, encoding='utf-8-sig')
     
